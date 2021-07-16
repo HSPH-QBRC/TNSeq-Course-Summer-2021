@@ -65,6 +65,10 @@ def main():
         help="FASTA file to search"
     )
     args = parser.parse_args()
+    # Check that the dinucleotide is only two nts long
+    if len(args.dinucleotide) != 2:
+        sys.stderr.write("Input dinucleotide is of the wrong size.\n")
+        sys.exit()
     # Start the actual finding
     get_dinucleotide(args.fasta, args.dinucleotide)
 

@@ -4,19 +4,78 @@ This day of the course will go through the entire process of converting the FAST
 
 ## Set up your work environment
 
-We will organize the work directory as good practice.
+We will organize the work directory as good practice. A few pointers. \* is a wildcard. It will grab anything. If you add it to beginning `.fastq` like so: `\*.fastq`, then any file that ends with `.fastq` will be grabbed. Alternatively, if we add \* to the end, like with `B_sub\*`, then we will grab any files that start with `B_sub`.
 
 ```bash
-cd ~ # This will bring you back to the home folder
-mkdir work # create a folder
-cd work # move to that folder
+cd ~ # Brings you back to the "home" folder
+# List all the files in the directory at the moment
+ls | cat
+
+# This should be the output
+0h_1.fastq.gz
+24h_1.fastq.gz
+5h_1.fastq.gz
+B_subtilis_subtilis_s168.1.ebwt
+B_subtilis_subtilis_s168.2.ebwt
+B_subtilis_subtilis_s168.3.ebwt
+B_subtilis_subtilis_s168.4.ebwt
+B_subtilis_subtilis_s168.TA.bed
+B_subtilis_subtilis_s168.fasta
+B_subtilis_subtilis_s168.genome
+B_subtilis_subtilis_s168.gff3
+B_subtilis_subtilis_s168.rev.1.ebwt
+B_subtilis_subtilis_s168.rev.2.ebwt
+bootstrapped_counts.tsv
+```
+
+Then we create the folders.
+
+```bash
 mkdir ref # create a folder for your reference files
 mkdir fastq # create a folder for your FASTQ files
 mkdir aln # create a folder for your SAM/BAM files
+mkdir counts # create a folder for your output counts
 mkdir logs # create a folder to hold all the output log files
 ```
 
+Finally, move the files to their respective folders to organize everything.
+
+```bash
+# Move all the B. subtilis reference files to /ref/
+mv B_subtilis* ref/
+# Move the FASTQS to the fastq/ folder.
+mv *.fastq.gz  fastq/
+# Move the bootstrap counts file to the counts/ folder
+mv bootstrapped_counts.tsv counts/
+
+# if you perform the following command which lists all your files
+# (that are not special hidden files in the OS; denoted by starting with '.')
+find . -not -path '*/\.*' -type f
+# This should be your output
+./fastq/24h_1.fastq.gz
+./fastq/5h_1.fastq.gz
+./fastq/0h_1.fastq.gz
+./counts/bootstrapped_counts.tsv
+./ref/B_subtilis_subtilis_s168.genome
+./ref/B_subtilis_subtilis_s168.rev.2.ebwt
+./ref/B_subtilis_subtilis_s168.fasta
+./ref/B_subtilis_subtilis_s168.1.ebwt
+./ref/B_subtilis_subtilis_s168.4.ebwt
+./ref/B_subtilis_subtilis_s168.rev.1.ebwt
+./ref/B_subtilis_subtilis_s168.2.ebwt
+./ref/B_subtilis_subtilis_s168.TA.bed
+./ref/B_subtilis_subtilis_s168.3.ebwt
+./ref/B_subtilis_subtilis_s168.gff3
+```
+
+Modify the .fastq.gz to whatever the ending of your FASTQ files are. Common alternatives are:
+* .fastq
+* .fq.gz
+* .fq
+
 ## SRA access
+
+**This is note necessary for the course. It simply shows how I got the data from the publication.** 
 
 SRP: SRP066259
 
@@ -60,19 +119,30 @@ We will use the program, via CLI) to QC all the libraries. FASTQC also comes wit
 ### The programmatic way
 
 ```bash
-cd ../work/fastq # Move to where your FASTQs are
+cd ~/fastq # Move to where your FASTQs are
 for fq in *.fastq.gz; do # Loop through every FASTQ
-    # $fq means use this variable
+    # ${fq} means use this variable that stands for an individual FASTQ from 
+    # *.fastq.gz
     # -o output files to this directory
-    #    We send it to the logs folder we created earlier
-    fastqc $fq -o ../logs;
+    #    We send the output to the logs folder we created earlier
+    fastqc ${fq} -o ../logs;
 done; # Done with loop
+
+# Check to see your logs were properly created and placed.
+ls ~/logs/
+# The results of your logs should look as follows
+0h_1_fastqc.html
+0h_1_fastqc.zip
+24h_1_fastqc.html
+24h_1_fastqc.zip
+5h_1_fastqc.html
+5h_1_fastqc.zip
 ```
 
 ### Example of the manual way
 
 ```bash
-fastqc 0h_1.fastq.gz -o ~/work/logs;
+fastqc 0h_1.fastq.gz -o ~/logs;
 ```
 
 
@@ -122,6 +192,8 @@ Parameters for cutadapt
 
 #### Single end sequencing (no trimming)
 
+For this workshop, use the following code. This is because the reads are 16bp, so trimming to a defined range 19bp <= lib <= 21bp would remove **ALL** reads. For longer read sequencing, and MmeI mariner based TnSeq protocols, you may want to include the size trimming.
+
 ```bash
 for first in *_1.fastq.gz; do # Loop through every first read FQ
     # Define the output trimmed read file names.
@@ -134,7 +206,19 @@ for first in *_1.fastq.gz; do # Loop through every first read FQ
         -o ${first_trimmed} \
         ${first} > ../logs/${report};
 done;
+
+# Look at the files in the FASTQ directory now
+ls 
+# You should have the following:
+0h_1.fastq.gz
+0h.trimmed_1.fastq.gz
+24h_1.fastq.gz
+24h.trimmed_1.fastq.gz
+5h_1.fastq.gz
+5h.trimmed_1.fastq.gz
 ```
+
+The following code snippets are for alternative experimental setups on TnSeq. If you have any questions about which 
 
 #### Single end sequencing with size filtering
 
@@ -175,17 +259,6 @@ for first in *_1.fastq.gz; do # Loop through every first read FQ
         -p ${second_trimmed} \
         ${first} ${second}> ../logs/${report};
 done;
-```
-
-### The manual way
-
-```bash
-cutadapt \
-    --minimum-length 19 \
-    --maximum-length 21 \
-    -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCA \
-        -o sampleA.trimmed_1.fastq.gz \
-        sampleA_R1.fastq.gz > ~/work/logs/${report};
 ```
 
 ## Alignment

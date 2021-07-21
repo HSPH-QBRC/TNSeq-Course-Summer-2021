@@ -5,7 +5,7 @@ Whether your experiment was a Himari-based or not, the analysis will use similar
 ## Loading your data
 
 ```R
-# Read in the count files as 
+# Read in the count files (as BED) to a dataframe in R
 zero <- read.delim("0h.trimmed.trimmed_TA_counts.bed", header=F, sep="\t")
 five <- read.delim("5h.trimmed.trimmed_TA_counts.bed", header=F, sep="\t")
 twentyfour <- read.delim(
@@ -13,21 +13,22 @@ twentyfour <- read.delim(
 )
 
 # Label the column names
-colnames(zero)
+colnames(zero) # show our current column names
+#[1] "V1" "V2" "V3" "V4"
 
->[1] "V1" "V2" "V3" "V4"
-
+# Make a new column name and assign as a variable
 col <- c("contig", "start", "end", "count")
+# Assign new column names to each dataframe
 colnames(zero) <- col
 colnames(five) <- col
 colnames(twentyfour) <- col
 
 head(zero)
->       contig start end count
->1 NC_000964.3    89  91     1
->2 NC_000964.3    92  94     1
->3 NC_000964.3   105 107     0
->4 NC_000964.3   125 127     0
+#       contig start end count
+# 1 NC_000964.3    89  91     1
+# 2 NC_000964.3    92  94     1
+# 3 NC_000964.3   105 107     0
+# 4 NC_000964.3   125 127     0
 ```
 
 ## Visualize the distribution of counts

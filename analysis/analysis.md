@@ -308,78 +308,12 @@ hist(log(counts$five + 1), col=rgb(1,0,0,1/4), add=T) # red
 
 ### Differential analysis
 
-Optional: We only have one library per condition, so we don't have replicates. In this situation, I will compensate for this by bootstrapping the samples.
-
-```R
-# Create an empty count dataframe
-counts.boot <- data.frame(
-    zero1 = rep(0, length(rownames(counts))),
-    zero2 = rep(0, length(rownames(counts))),
-    zero3 = rep(0, length(rownames(counts))),
-    five1 = rep(0, length(rownames(counts))),
-    five2 = rep(0, length(rownames(counts))),
-    five3 = rep(0, length(rownames(counts))),
-    twentyfour1 = rep(0, length(rownames(counts))),
-    twentyfour2 = rep(0, length(rownames(counts))),
-    twentyfour3 = rep(0, length(rownames(counts)))
-)
-
-# Bootstrap
-for (i in sample(
-    seq(1, length(counts$zero)), 8000000, prob=counts$zero/sum(counts$zero), replace = T
-)) {
-    counts.boot$zero1[i] <- counts.boot$zero1[i] + 1
-}
-for (i in sample(
-    seq(1, length(counts$zero)), 8000000, prob=counts$zero/sum(counts$zero), replace = T
-)) {
-    counts.boot$zero2[i] <- counts.boot$zero2[i] + 1
-}
-for (i in sample(
-    seq(1, length(counts$zero)), 8000000, prob=counts$zero/sum(counts$zero), replace = T
-)) {
-    counts.boot$zero3[i] <- counts.boot$zero3[i] + 1
-}
-for (i in sample(
-    seq(1, length(counts$zero)), 8000000, prob=counts$five/sum(counts$five), replace = T
-)) {
-    counts.boot$five1[i] <- counts.boot$five1[i] + 1
-}
-for (i in sample(
-    seq(1, length(counts$zero)), 8000000, prob=counts$five/sum(counts$five), replace = T
-)) {
-    counts.boot$five2[i] <- counts.boot$five2[i] + 1
-}
-for (i in sample(
-    seq(1, length(counts$zero)), 8000000, prob=counts$five/sum(counts$five), replace = T
-)) {
-    counts.boot$five3[i] <- counts.boot$five3[i] + 1
-}
-for (i in sample(
-    seq(1, length(counts$zero)), 8000000, prob=counts$twentyfour/sum(counts$twentyfour), replace = T
-)) {
-    counts.boot$twentyfour1[i] <- counts.boot$twentyfour1[i] + 1
-}
-for (i in sample(
-    seq(1, length(counts$zero)), 8000000, prob=counts$twentyfour/sum(counts$twentyfour), replace = T
-)) {
-    counts.boot$twentyfour2[i] <- counts.boot$twentyfour2[i] + 1
-}
-for (i in sample(
-    seq(1, length(counts$zero)), 8000000, prob=counts$twentyfour/sum(counts$twentyfour), replace = T
-)) {
-    counts.boot$twentyfour3[i] <- counts.boot$twentyfour3[i] + 1
-}
-
-# Add the gene names
-rownames(counts.boot) <- rownames(counts)
-
-```
-
-Now we will continue on with the analysis.
+We only have one library per condition, so we don't have replicates. In this situation, I compensated for this by bootstrapping the samples. Thus, I created synthetic library replicates from the libraries we have been working with.
 
 ```R
 library(DESeq2)
+
+counts.boot <- read.delim("bootstrapped_counts.tsv", header=T, sep="\t")
 
 # Create a data frame that describes the various conditions of the samples
 # Individual samples (columns of the counts) are the rows
@@ -388,7 +322,7 @@ coldata <- data.frame(
     condition = as.factor(c(rep(0,3), rep(5, 3), rep(24,3))), 
     row.names = c(
         "zero1", "zero2", "zero3",
-        "five", "five2", "five3",
+        "five1", "five2", "five3",
         "twentyfour1", "twentyfour2", "twentyfour3"
     )
 )

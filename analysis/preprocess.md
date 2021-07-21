@@ -12,20 +12,20 @@ cd ~ # Brings you back to the "home" folder
 ls | cat
 
 # This should be the output
-0h_1.fastq.gz
-24h_1.fastq.gz
-5h_1.fastq.gz
-B_subtilis_subtilis_s168.1.ebwt
-B_subtilis_subtilis_s168.2.ebwt
-B_subtilis_subtilis_s168.3.ebwt
-B_subtilis_subtilis_s168.4.ebwt
-B_subtilis_subtilis_s168.TA.bed
-B_subtilis_subtilis_s168.fasta
-B_subtilis_subtilis_s168.genome
-B_subtilis_subtilis_s168.gff3
-B_subtilis_subtilis_s168.rev.1.ebwt
-B_subtilis_subtilis_s168.rev.2.ebwt
-bootstrapped_counts.tsv
+# 0h_1.fastq.gz
+# 24h_1.fastq.gz
+# 5h_1.fastq.gz
+# B_subtilis_subtilis_s168.1.ebwt
+# B_subtilis_subtilis_s168.2.ebwt
+# B_subtilis_subtilis_s168.3.ebwt
+# B_subtilis_subtilis_s168.4.ebwt
+# B_subtilis_subtilis_s168.TA.bed
+# B_subtilis_subtilis_s168.fasta
+# B_subtilis_subtilis_s168.genome
+# B_subtilis_subtilis_s168.gff3
+# B_subtilis_subtilis_s168.rev.1.ebwt
+# B_subtilis_subtilis_s168.rev.2.ebwt
+# bootstrapped_counts.tsv
 ```
 
 Then we create the folders.
@@ -52,20 +52,20 @@ mv bootstrapped_counts.tsv counts/
 # (that are not special hidden files in the OS; denoted by starting with '.')
 find . -not -path '*/\.*' -type f
 # This should be your output
-./fastq/24h_1.fastq.gz
-./fastq/5h_1.fastq.gz
-./fastq/0h_1.fastq.gz
-./counts/bootstrapped_counts.tsv
-./ref/B_subtilis_subtilis_s168.genome
-./ref/B_subtilis_subtilis_s168.rev.2.ebwt
-./ref/B_subtilis_subtilis_s168.fasta
-./ref/B_subtilis_subtilis_s168.1.ebwt
-./ref/B_subtilis_subtilis_s168.4.ebwt
-./ref/B_subtilis_subtilis_s168.rev.1.ebwt
-./ref/B_subtilis_subtilis_s168.2.ebwt
-./ref/B_subtilis_subtilis_s168.TA.bed
-./ref/B_subtilis_subtilis_s168.3.ebwt
-./ref/B_subtilis_subtilis_s168.gff3
+# ./fastq/24h_1.fastq.gz
+# ./fastq/5h_1.fastq.gz
+# ./fastq/0h_1.fastq.gz
+# ./counts/bootstrapped_counts.tsv
+# ./ref/B_subtilis_subtilis_s168.genome
+# ./ref/B_subtilis_subtilis_s168.rev.2.ebwt
+# ./ref/B_subtilis_subtilis_s168.fasta
+# ./ref/B_subtilis_subtilis_s168.1.ebwt
+# ./ref/B_subtilis_subtilis_s168.4.ebwt
+# ./ref/B_subtilis_subtilis_s168.rev.1.ebwt
+# ./ref/B_subtilis_subtilis_s168.2.ebwt
+# ./ref/B_subtilis_subtilis_s168.TA.bed
+# ./ref/B_subtilis_subtilis_s168.3.ebwt
+# ./ref/B_subtilis_subtilis_s168.gff3
 ```
 
 Modify the .fastq.gz to whatever the ending of your FASTQ files are. Common alternatives are:
@@ -218,7 +218,7 @@ ls
 5h.trimmed_1.fastq.gz
 ```
 
-The following code snippets are for alternative experimental setups on TnSeq. If you have any questions about which 
+The following code snippets are for alternative experimental setups on TnSeq. Mix and match some of the parameters depending on your project. For example, non-mariner non-MmeI TnSeq protocols should not use the --minimum-length and --length parameters. Delete those parts. Those are for when you expect an exact size 20bp genome fragment, and want to trim reads to that exact size.
 
 #### Single end sequencing with size filtering
 
@@ -273,6 +273,8 @@ Before you can align to your genome of interest, you will need to index genome's
 
 `-f` indicates that the input reference is in FASTA format.
 
+**Note: Because it takes so long, we will not be building the genome index during the workshop. Instead it is provided for you.** However, if you are running this on your own, you will need to build the index before you are able to align your reads.
+
 ```bash
 cd ../ref/
 bowtie-build \
@@ -280,6 +282,14 @@ bowtie-build \
     B_subtilis_subtilis_s168.fasta \
     B_subtilis_subtilis_s168
 ```
+
+This should produce the following files:
+* B_subtilis_subtilis_s168.1.ebwt
+* B_subtilis_subtilis_s168.2.ebwt
+* B_subtilis_subtilis_s168.3.ebwt
+* B_subtilis_subtilis_s168.4.ebwt
+* B_subtilis_subtilis_s168.rev.1.ebwt
+* B_subtilis_subtilis_s168.rev.2.ebwt
 
 Once you have the genome indexed, you can proceed with aligning the FASTQs.
 
@@ -310,7 +320,7 @@ The bowtie parameters we will be sending is as follows:
     * outputs the alignment in SAM format
     * SAM has become the universal output alignment format, for which many downstream tools expect. (As opposed to the old, original bowtie output.)
 
-Note that bowtie outputs the data to the screen, so you must send it to a file with `>`. Additionally, bowtie sends its statistics to the screen as an "error," so we send that to a file with `2>`.
+Note that bowtie outputs the data to the screen, so you must send it to a file with `>`. Additionally, bowtie sends its statistics to the screen as an "error," so we send that to a file with `2>`. This is a common occurence with many of the tools, so this `>` will show up often further along.
 
 ```bash
 cd ../fastq;
@@ -344,6 +354,7 @@ mv *.sam ../aln
 ```bash
 # Index the genome
 bwa index B_subtilis_subtilis_s168.fasta
+# Align the reads
 bwa mem \
     B_subtilis_subtilis_s168.fasta \
     required_first_read.fastq \
@@ -354,6 +365,8 @@ bwa mem \
 ## Alignment QC and statistics
 
 `samtools view` will convert the SAM file to the binary BAM file, but will output is to "text" on the screen. We must point it to the file to which it would be read. However, we can instead send it to another program, `samtools`, to have it sort it first. `samtools sort` recognizes that it is being sent the file with `-`. This is output to a file with `-o`. We need to index this binary with `samtools index` for rapid search in the file.
+
+**A quick note:** Here we introduce another special character `|`. It is similar to `>`. Where `>` sends the output of the program to file, `|` sends the output of a program to another program. In this case the output of `samtools view` (which would be a BAM file) is passed to `samtools sort`.
 
 ```bash
 cd ../aln
@@ -416,18 +429,28 @@ python dinucleotide_loci_from_FASTA.py \
 # This lists the contig sizes for the genome
 # This is only necessary for the optional counting step later
 samtools view -H 0h.trimmed.bam
->@HD	VN:1.0	SO:coordinate
->@SQ	SN:NC_000964.3	LN:4215606
->@PG	ID:Bowtie	VN:1.3.0	CL:"/home/drdeconti/bin/miniconda3/envs/tnseq/bin/bowtie-align-s --wrapper basic-0 -v 3 -a --best --strata -m 1 -q --sam -x ../ref/B_subtilis_subtilis_s168 0h.trimmed_1.fastq.gz"
->@PG	ID:samtools	PN:samtools	PP:Bowtie	VN:1.13	CL:samtools view -bht ../ref/B_subtilis_subtilis_s168.fasta 0h.trimmed.sam
->@PG	ID:samtools.1	PN:samtools	PP:samtools	VN:1.13	CL:samtools sort -o 0h.trimmed.bam -
->@PG	ID:samtools.2	PN:samtools	PP:samtools.1	VN:1.13	CL:samtools view -H 0h.trimmed.bam
+# @HD	VN:1.0	SO:coordinate
+# @SQ	SN:NC_000964.3	LN:4215606
+# @PG	ID:Bowtie	VN:1.3.0	CL:"/home/drdeconti/bin/miniconda3/envs/tnseq/bin/bowtie-align-s --wrapper basic-0 -v 3 -a --best --strata -m 1 -q --sam -x ../ref/B_subtilis_subtilis_s168 0h.trimmed_1.fastq.gz"
+# @PG	ID:samtools	PN:samtools	PP:Bowtie	VN:1.13	CL:samtools view -bht ../ref/B_subtilis_subtilis_s168.fasta 0h.trimmed.sam
+# @PG	ID:samtools.1	PN:samtools	PP:samtools	VN:1.13	CL:samtools sort -o 0h.trimmed.bam -
+# @PG	ID:samtools.2	PN:samtools	PP:samtools.1	VN:1.13	CL:samtools view -H 0h.trimmed.bam
 
 # Write a tab-delimited file outlining the contig sizes
 # @SG will list out all contigs and their respective lengths
 echo -e "NC_000964.3\t4215606" > ../ref/B_subtilis_subtilis_s168.genome
 
+# Now we need to find where the reads overlap TA sites. The most simple 
+# process is to just see where the read overlaps any TA sites.
 # bedtools will find all the reads that overlap the TA BED we created
+# bedtools intersect finds all regions that overlap between a and b
+# parameters:
+# -c: count the number of time file A is intersected, and report this number
+# -sorted: expect the input files to be sorted (speeds things up)
+# -a: BED file A
+# -b: BED file B
+# Note: order of BED files matter, as exampled in the use of -c where it only
+# cares about BED file A
 for bam in *.bam; do
     bedtools intersect \
         -c \
@@ -442,10 +465,11 @@ done;
 # So, let us only consider the central part of the read.
 # To do this, we will trim the read from the right by 8 with bedtools.
 # 1. Convert BAM to BED
-# 2. Trim the BAM's BED file by 2
+#    We do this so slop can work (it doesn't work on direct BAM files)
+# 2. Trim the BAM's BED file by 12 bp
 #    -s = trim length by strand orientation
 #         so reads on the - strand will reverse -l/-r
-#    -l = add this length off the left side of read (add -8)
+#    -l = add this length off the left side of read (add -12)
 #    -r = add this length off the right side of read (0)
 # 3. Sort BED (just to be safe)
 # 4. Send into the intersect
@@ -482,6 +506,11 @@ featureCounts \
 tail -n +2 gene_counts.txt > gene_counts.no_header.txt;
 mv gene_counts.txt gene_counts.no_header.txt ../counts/
 mv gene_counts.txt.summary ../logs/
+# Optional
+# Cut out just the gene names and counts
+# This is useful for general inputs to a variety of other tools in
+# the bioinformatics sphere
+cut -f1,7- gene_counts.no_header.txt > gene_counts.matrix.tsv;
 ```
 
 ### Conversion to wig for TRANSIT
@@ -489,9 +518,21 @@ mv gene_counts.txt.summary ../logs/
 ```bash
 cd ../aln/
 for bam in *.bam; do
+    # We start with adding the necessary WIG file header
+    # It just defines the single chromosome for the following data
+    # Multi-chromosome genomes will need to do some extra steps to make
+    # all this work.
     # 1. Convert bam to BED
     # 2. Reduce read size
     # 3. Sort
+    # 4. Get coverage for whole genome
+    #    -i: input file (here we use '-' to stand in for the '|' data)
+    #    -g: genome size file
+    #    -bga: report depth as BedGraph format
+    #    -5 Only calculate the coverage of the 5' positions
+    #       Only use this for TA based protocols. Other protocols, remove
+    #       this -5 parameter.
+    # 5. Cut out the unnecessary columns to make this a WIG format
     echo "variableStep chrom=NC_000964.3" > ${bam%.bam}.wig;
     bedtools bamtobed -i ${bam} \
     | bedtools slop \
@@ -507,7 +548,8 @@ for bam in *.bam; do
     | bedtools genomecov \
         -i - \
         -g ../ref/B_subtilis_subtilis_s168.genome \
-        -bga -5 \
+        -bga \
+        -5 \
     | cut -f2,4 >> ${bam%.bam}.wig
 done;
 ```

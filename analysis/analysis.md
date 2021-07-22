@@ -320,6 +320,10 @@ counts.boot <- read.delim("bootstrapped_counts.tsv", header=T, sep="\t")
 # Create a data frame that describes the various conditions of the samples
 # Individual samples (columns of the counts) are the rows
 # Can keep adding columns for as much annotation as the experiment requires
+# Here we add 0, 5, and 24 as the labels for the columns
+# rep(0, 3) == c(0, 0, 0)
+# so the c(rep...) used creates
+# c(0, 0, 0, 5, 5, 5, 24, 24, 24)
 coldata <- data.frame(
     condition = as.factor(c(rep(0,3), rep(5, 3), rep(24,3))), 
     row.names = c(
@@ -329,12 +333,19 @@ coldata <- data.frame(
     )
 )
 
-# 
+# Create a deseq object from our count matrix
+# Requires: 
+#   1) count matrix 
+#   2) annotation of the samples / columns
+#   3) the design of the experiment
 dds <- DESeqDataSetFromMatrix(
     countData = counts.boot,
     colData = coldata,
     design = ~ condition
 )
+# Make sure to set the baseline
+# if not set manually, deseq will use whatever comes first
+# alphabetically
 dds$condition <- relevel(dds$condition, ref = "0")
 
 # Calculate the normalization factors, and apply the dds
@@ -345,7 +356,9 @@ normFunc <- function(x) {
     )
 }
 normFactors <- sapply(counts.boot, normFunc)
+# apply the norm factors to the deseq object
 sizeFactors(dds) <- normFactors
+# Continue with the deseq2 process
 dds <- estimateDispersions(dds)
 dds <- nbinomWaldTest(dds)
 

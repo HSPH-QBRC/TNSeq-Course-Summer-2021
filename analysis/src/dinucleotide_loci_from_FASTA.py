@@ -57,8 +57,8 @@ def main():
         "Finds dinucleotide loci in FASTA and outputs loci to BED"
     )
     parser.add_argument(
-        "--dinucleotide", metavar="diNT", default="TA", 
-        help="Dinucleotide to search"
+        "--nucleotides", metavar="NT", default="TA", 
+        help="Nucleotide sequence to search"
     )
     parser.add_argument(
         "fasta", metavar="FASTA",
@@ -66,11 +66,11 @@ def main():
     )
     args = parser.parse_args()
     # Check that the dinucleotide is only two nts long
-    if len(args.dinucleotide) != 2:
-        sys.stderr.write("Input dinucleotide is of the wrong size.\n")
-        sys.exit()
+    #if len(args.dinucleotide) != 2:
+    #    sys.stderr.write("Input dinucleotide is of the wrong size.\n")
+    #    sys.exit()
     # Start the actual finding
-    get_dinucleotide(args.fasta, args.dinucleotide)
+    get_dinucleotide(args.fasta, args.nucleotides)
 
 if __name__ == "__main__":
     main()

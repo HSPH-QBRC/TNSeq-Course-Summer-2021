@@ -4,12 +4,14 @@ Whether your experiment was a Himari-based or not, the analysis will use similar
 
 ## Loading your data
 
+First, start an R session. In a jupyter lab or notebook, you can create a new R shell. On the terminal on a private computer, you can start R with `R` on the command line.
+
 ```R
 # Read in the count files (as BED) to a dataframe in R
-zero <- read.delim("0h.trimmed.trimmed_TA_counts.bed", header=F, sep="\t")
-five <- read.delim("5h.trimmed.trimmed_TA_counts.bed", header=F, sep="\t")
+zero <- read.delim("0h.trimmed.TA_counts.bed", header=F, sep="\t")
+five <- read.delim("5h.trimmed.TA_counts.bed", header=F, sep="\t")
 twentyfour <- read.delim(
-    "24h.trimmed.trimmed_TA_counts.bed", header=F, sep="\t"
+    "24h.trimmed.TA_counts.bed", header=F, sep="\t"
 )
 
 # Label the column names
